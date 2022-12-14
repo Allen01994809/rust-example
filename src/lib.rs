@@ -1,27 +1,51 @@
-use wasm_bindgen::prelude::*;
+use std::f64;
+use wasm_bindgen::{prelude::*, JsCast};
+
+#[wasm_bindgen]
+extern {
+    pub fn alert(s: &str);
+}
 
 #[wasm_bindgen(start)]
 pub fn run() -> Result<(), JsValue> {
     let window = web_sys::window().expect("no global `window` exists");
     let document = window.document().expect("should have a document on window");
     let body = document.body().expect("document should have a body");
+    let canvas: web_sys::HtmlCanvasElement = document
+        .create_element("canvas")?
+        .dyn_into::<web_sys::HtmlCanvasElement>()
+        .map_err(|_| ())
+        .unwrap();
 
-    // SVGの描画領域を作る
-    let svg = document.create_element_ns(Some("http://www.w3.org/2000/svg"), "svg")?;
-    svg.set_attribute("width", "100")?;
-    svg.set_attribute("hight", "100")?;
-    svg.set_attribute("viewBox", "0 0 100 100")?;
+    let context = canvas.get_context("2d")
+        .unwrap()
+        .unwrap()
+        .dyn_into::<web_sys::CanvasRenderingContext2d>()?;
+    context.begin_path();
 
-    // 円を描画
-    let circle = document.create_element_ns(Some("http://www.w3.org/2000/svg"), "circle")?;
-    circle.set_attribute("cx", "50")?;
-    circle.set_attribute("cy", "50")?;
-    circle.set_attribute("r", "20")?;
-    circle.set_attribute("stroke", "black")?;
-    circle.set_attribute("fill", "red")?;
-    svg.append_child(&circle)?;
-    body.append_child(&svg)?;
+    // Draw the outer circle.
+    context
+        .arc(75.0, 75.0, 50.0, 0.0, f64::consts::PI * 2.0)
+        .unwrap();
 
+    // Draw the mouth.
+    context.move_to(110.0, 75.0);
+    context.arc(75.0, 75.0, 35.0, 0.0, f64::consts::PI).unwrap();
+
+    // Draw the left eye.
+    context.move_to(65.0, 65.0);
+    context
+        .arc(60.0, 65.0, 5.0, 0.0, f64::consts::PI * 2.0)
+        .unwrap();
+
+    // Draw the right eye.
+    context.move_to(95.0, 65.0);
+    context
+        .arc(90.0, 65.0, 5.0, 0.0, f64::consts::PI * 2.0)
+        .unwrap();
+
+    context.stroke();
+    body.append_child(&canvas)?;
     Ok(())
 }
 

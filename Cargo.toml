@@ -19,5 +19,7 @@ features = [
   'SvgCircleElement', # 追加
   'Node',
   'Window',
+  'HtmlCanvasElement',
+  'CanvasRenderingContext2d',
 ]
 
